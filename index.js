@@ -2,6 +2,7 @@ const express = require("express");
 const {createServer} = require("node:http");
 const path = require("path");
 const { Server } = require('socket.io');
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 const server = createServer(app);
@@ -22,7 +23,7 @@ app.get("/", (req, res) => {
     return res.sendFile("/public/index.html");
 })
 
-server.listen(3000, () => {
+server.listen(PORT, () => {
     console.log(`server running at 3000`)
 })
 
