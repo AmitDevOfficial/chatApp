@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #message {
+            width: 99%;
+            margin: 20px auto;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .msg {
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin: 5px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .left-msg {
+            background-color: #f1f1f1;
+            align-self: flex-start;
+        }
+
+        .right-msg {
+            background-color: #4CAF50;
+            color: white;
+            align-self: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Chatting</h1>
+        <div id="message"></div>
+        <div class="myInputBox">
+            <input type="text" id="msg" placeholder="Enter your Message">
+            <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const sendBtn = document.getElementById("sendBtn");
+        const msgInput = document.getElementById("msg");
+        const allMessages = document.getElementById("message");
+
+        const userId = Math.random().toString(36).substring(7); // Unique ID har user ke liye
+
+        socket.on("msg", (data) => {
+            const p = document.createElement("p");
+            p.innerText = data.msg;
+            p.classList.add("msg");
+            if (data.userId === userId) {
+                p.classList.add("right-msg");
+            } else {
+                p.classList.add("left-msg");
+            }
+            allMessages.appendChild(p);
+            allMessages.scrollTop = allMessages.scrollHeight; // Auto-scroll to latest message
+        });
+
+        sendBtn.addEventListener('click', () => {
+            const msg = msgInput.value;
+            if (msg.trim() === "") return;
+            socket.emit("user-msg", { msg, userId });
+            msgInput.value = "";
+        });
+    </script>
+</body>
+
+</html>

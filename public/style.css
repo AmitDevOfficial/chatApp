@@ -1,0 +1,38 @@
+.container{
+    width: 50%;
+    margin: 0px auto;
+    background: linear-gradient(22deg, #4875ff, #a64dff);
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+}
+input {
+    padding: 10px;
+    font-size: 20px;
+    background: #fff6e6;
+    outline: none;
+    border: none;
+    width: 89%;
+}
+.myInputBox{
+    height: 10vh;
+    margin: 20px auto;
+}
+.fa-solid, .fas {
+    font-weight: 900;
+    padding: 8px;
+    font-size: 24px;
+}
+
+#sendBtn{
+    border-radius: 31px;
+    padding: 5px;
+    border: none;
+    background: #00d900;
+}
+
+.fa-solid, .fas {
+    font-weight: 900;
+    color: white;
+}
+
