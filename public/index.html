@@ -49,24 +49,34 @@
 <body>
     <div class="container">
         <h1>Chatting</h1>
+        <button id="callBtn">Start Video Call</button>
         <div id="message"></div>
+        <div>
+            <video id="myVideo" autoplay muted></video>
+            <video id="peerVideo" autoplay></video>
+        </div>
         <div class="myInputBox">
             <input type="text" id="msg" placeholder="Enter your Message">
             <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+
         </div>
     </div>
 
 
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+  
     <script>
         const socket = io();
         const sendBtn = document.getElementById("sendBtn");
         const msgInput = document.getElementById("msg");
         const allMessages = document.getElementById("message");
+        const callBtn = document.getElementById("callBtn");
 
-        const userId = Math.random().toString(36).substring(7); // Unique ID har user ke liye
+        const userId = Math.random().toString(36).substring(7); // Unique ID
 
+        // 🟢 Receive Messages
         socket.on("msg", (data) => {
             const p = document.createElement("p");
             p.innerText = data.msg;
@@ -77,15 +87,57 @@
                 p.classList.add("left-msg");
             }
             allMessages.appendChild(p);
-            allMessages.scrollTop = allMessages.scrollHeight; // Auto-scroll to latest message
+            allMessages.scrollTop = allMessages.scrollHeight; // Auto-scroll
         });
 
+        // 🟢 Send Message
         sendBtn.addEventListener('click', () => {
             const msg = msgInput.value;
             if (msg.trim() === "") return;
             socket.emit("user-msg", { msg, userId });
             msgInput.value = "";
         });
+
+        // 🟢 Video Call System
+        const myVideo = document.getElementById("myVideo");
+        const peerVideo = document.getElementById("peerVideo");
+
+        // ✅ Initialize PeerJS Correctly
+        const peer = new Peer({
+            host: "localhost",  // 🔹 `localhost` set karo agar same server pe ho
+            port: 3000,
+            path: "/peerjs",
+            secure: false,  // 🔹 Localhost pe `false`, production pe `true`
+        });
+
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+            myVideo.srcObject = stream;
+
+            peer.on("open", (id) => {
+                console.log("Peer ID:", id);
+                callBtn.addEventListener("click", () => {
+                    socket.emit("join-call", id);
+                });
+            });
+
+            peer.on("call", (call) => {
+                call.answer(stream); // Answer incoming call
+                call.on("stream", (peerStream) => {
+                    peerVideo.srcObject = peerStream;
+                });
+            });
+
+            socket.on("user-connected", (userId) => {
+                console.log("User joined: ", userId);
+                const call = peer.call(userId, stream);
+                call.on("stream", (peerStream) => {
+                    peerVideo.srcObject = peerStream;
+                });
+            });
+        }).catch(err => {
+            console.error("Error accessing media devices:", err);
+        });
+
     </script>
 </body>
 
